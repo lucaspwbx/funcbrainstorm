@@ -37,8 +37,8 @@ func DeleteContact(params Params) string {
 }
 
 func main() {
-	fmt.Println(GetContacts(map[string]string{"title": "NotaUm"}))
-	fmt.Println(CreateContact(map[string]string{"name": "Lucas", "email": "foo@bar.com"}))
-	fmt.Println(UpdateContact(map[string]string{"iden": "1234", "name": "Lucas"}))
-	fmt.Println(DeleteContact(map[string]string{"iden": "1234"}))
+	fmt.Println(GetContacts(Params{"title": "NotaUm"}))
+	fmt.Println(CreateContact(Params{"name": "Lucas", "email": "foo@bar.com"}))
+	fmt.Println(UpdateContact(Params{"iden": "1234", "name": "Lucas"}))
+	fmt.Println(DeleteContact(Params{"iden": "1234"}))
 }
