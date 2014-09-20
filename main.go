@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -40,35 +41,47 @@ func NewPushRequest(method, endpoint string, params Params) *PushRequest {
 	return &PushRequest{Method: method, Endpoint: endpoint, Params: params}
 }
 
-func NewHttpRequest() (*http.Request, error) {
+func GetContacts() (*http.Request, error) {
 	return newRequestFunc(NewPushRequest("GET", "/contacts", nil))
 }
 
-func GetContacts(params Params) string {
-	//return logFunc("GET", "/contacts", params)
-	return "not implemented"
+func CreateContact(params Params) (*http.Request, error) {
+	request := NewPushRequest("POST", "/contacts", params)
+	return newRequestFunc(request)
 }
 
-func CreateContact(params Params) string {
-	//return logFunc("POST", "/contacts", params)
-	return "not implemented"
+func UpdateContact(params Params) (*http.Request, error) {
+	endpoint, err := ParseParamsId(params)
+	if err != nil {
+		return nil, err
+	}
+	request := NewPushRequest("POST", endpoint, params)
+	return newRequestFunc(request)
 }
 
-func UpdateContact(params Params) string {
-	//contact_iden := params["iden"]
-	//endpoint := fmt.Sprintf("/contacts/%s", contact_iden)
-	//return logFunc("POST", endpoint, params)
-	return "not implemented"
+func DeleteContact(params Params) (*http.Request, error) {
+	endpoint, err := ParseParamsId(params)
+	if err != nil {
+		return nil, err
+	}
+	request := NewPushRequest("DELETE", endpoint, params)
+	return newRequestFunc(request)
 }
 
-func DeleteContact(params Params) string {
-	//contact_iden := params["iden"]
-	//endpoint := fmt.Sprintf("/contacts/%s", contact_iden)
-	//return logFunc("DELETE", endpoint, params)
-	return "not implemented"
+func ParseParamsId(params Params) (endpoint string, err error) {
+	if id, ok := params["iden"]; ok {
+		return fmt.Sprintf("/contacts/%s", id), nil
+	}
+	return "", errors.New("No id")
 }
 
 func main() {
-	req, _ := NewHttpRequest()
+	req, _ := GetContacts()
 	fmt.Println(req)
+	req2, _ := CreateContact(Params{"teste": "bla"})
+	fmt.Println(req2)
+	req3, _ := UpdateContact(Params{"iden": "123"})
+	fmt.Println(req3)
+	req4, _ := DeleteContact(Params{"iden": "123"})
+	fmt.Println(req4)
 }
