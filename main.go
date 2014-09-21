@@ -38,8 +38,6 @@ type PushRequest struct {
 
 type Params map[string]string
 
-type PushResponse map[string]interface{}
-
 func ExecuteRequest(r *http.Request) (*http.Response, error) {
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(r)
@@ -47,17 +45,6 @@ func ExecuteRequest(r *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	return resp, nil
-}
-
-func ParseResponse(res *http.Response) (PushResponse, error) {
-	var response PushResponse
-	defer res.Body.Close()
-
-	err := json.NewDecoder(res.Body).Decode(&response)
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
 }
 
 type Me struct {
@@ -86,15 +73,13 @@ func (c *ContactsColl) Get() {
 		fmt.Println(err)
 		return
 	}
-	//*c, _ = c.ParseResponse2(resp)
-	//*c, _ = c.ParseResponse2(resp)
-	err = c.ParseResponseWithPointer(resp)
+	err = c.ParseResponse(resp)
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-func (c *ContactsColl) ParseResponseWithPointer(res *http.Response) error {
+func (c *ContactsColl) ParseResponse(res *http.Response) error {
 	defer res.Body.Close()
 	err := json.NewDecoder(res.Body).Decode(c)
 	if err != nil {
@@ -103,37 +88,26 @@ func (c *ContactsColl) ParseResponseWithPointer(res *http.Response) error {
 	return nil
 }
 
-func (c *ContactsColl) ParseResponse(res *http.Response) (ContactsColl, error) {
-	var response ContactsColl
-	defer res.Body.Close()
-
-	err := json.NewDecoder(res.Body).Decode(&response)
+func (m *Me) Get() {
+	req, _ := GetMe()
+	resp, err := ExecuteRequest(req)
 	if err != nil {
-		return ContactsColl{}, err
+		fmt.Println(err)
+		return
 	}
-	return response, nil
+	err = m.ParseResponse(resp)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func ParseResponse3(res *http.Response) (ContactsColl, error) {
-	var response ContactsColl
+func (m *Me) ParseResponse(res *http.Response) error {
 	defer res.Body.Close()
-
-	err := json.NewDecoder(res.Body).Decode(&response)
+	err := json.NewDecoder(res.Body).Decode(m)
 	if err != nil {
-		return ContactsColl{}, err
+		return err
 	}
-	return response, nil
-}
-
-func ParseResponse2(res *http.Response) (Me, error) {
-	var response Me
-	defer res.Body.Close()
-
-	err := json.NewDecoder(res.Body).Decode(&response)
-	if err != nil {
-		return Me{}, err
-	}
-	return response, nil
+	return nil
 }
 
 func NewPushRequest(method, endpoint string, params Params) *PushRequest {
@@ -141,9 +115,6 @@ func NewPushRequest(method, endpoint string, params Params) *PushRequest {
 }
 
 func GetContacts() (*http.Request, error) {
-	//return newRequestFunc(NewPushRequest("GET", "/contacts", nil))
-	//return newRequestFunc(NewPushRequest("GET", "http://www.google.com", nil))
-	//return newRequestFunc(NewPushRequest("GET", "https://api.pushbullet.com/v2/contacts", nil))
 	return newRequestFunc(NewPushRequest("GET", "https://api.pushbullet.com/v2/contacts", nil))
 }
 
@@ -182,26 +153,27 @@ func ParseParamsId(params Params) (string, error) {
 }
 
 func main() {
-	req, _ := GetContacts()
+	//req, _ := GetContacts()
 	//req, _ := GetMe()
-	fmt.Println(req)
-	req2, _ := CreateContact(Params{"teste": "bla"})
-	fmt.Println(req2)
-	req3, _ := UpdateContact(Params{"iden": "123"})
-	fmt.Println(req3)
-	req4, _ := DeleteContact(Params{"iden": "123"})
-	fmt.Println(req4)
-	fmt.Println(req)
-	resp, err := ExecuteRequest(req)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	//body, _ := ParseResponse2(resp)
-	body, _ := ParseResponse3(resp)
-	fmt.Println(body)
+	//fmt.Println(req)
+	//req2, _ := CreateContact(Params{"teste": "bla"})
+	//fmt.Println(req2)
+	//req3, _ := UpdateContact(Params{"iden": "123"})
+	//fmt.Println(req3)
+	//req4, _ := DeleteContact(Params{"iden": "123"})
+	//fmt.Println(req4)
+	//fmt.Println(req)
+	//resp, err := ExecuteRequest(req)
+	//if err != nil {
+	//fmt.Println(err)
+	//return
+	//}
 
 	coll := &ContactsColl{}
 	coll.Get()
 	fmt.Println(coll)
+
+	me := &Me{}
+	me.Get()
+	fmt.Println(me)
 }
