@@ -28,14 +28,6 @@ var (
 		}
 		return req, nil
 	}
-
-	getResponseFunc = func(r *http.Request) (PushResponse, error) {
-		response, err := makeRequest(r)
-		if err != nil {
-			return nil, err
-		}
-		return response, nil
-	}
 )
 
 type PushRequest struct {
@@ -48,16 +40,20 @@ type Params map[string]string
 
 type PushResponse map[string]interface{}
 
-func makeRequest(r *http.Request) (PushResponse, error) {
+func ExecuteRequest(r *http.Request) (*http.Response, error) {
 	httpClient := &http.Client{}
 	resp, err := httpClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	return resp, nil
+}
 
+func ParseResponse(res *http.Response) (PushResponse, error) {
 	var response PushResponse
-	err = json.NewDecoder(resp.Body).Decode(&response)
+	defer res.Body.Close()
+
+	err := json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
 		return nil, err
 	}
@@ -66,14 +62,6 @@ func makeRequest(r *http.Request) (PushResponse, error) {
 
 func NewPushRequest(method, endpoint string, params Params) *PushRequest {
 	return &PushRequest{Method: method, Endpoint: endpoint, Params: params}
-}
-
-func ParseResponse(req *http.Request) (map[string]interface{}, error) {
-	resp, err := getResponseFunc(req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
 }
 
 func GetContacts() (*http.Request, error) {
@@ -122,10 +110,11 @@ func main() {
 	req4, _ := DeleteContact(Params{"iden": "123"})
 	fmt.Println(req4)
 	fmt.Println(req)
-	bla, err := ParseResponse(req)
+	resp, err := ExecuteRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(bla)
+	body, _ := ParseResponse(resp)
+	fmt.Println(body)
 }
