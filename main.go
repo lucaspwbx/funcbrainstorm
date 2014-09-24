@@ -23,7 +23,6 @@ var (
 		log := logFunc(r)
 		fmt.Println(log)
 
-		//parse params and jsonify
 		req, err := http.NewRequest(r.Method, r.Endpoint, nil)
 		//	req.SetBasicAuth("user", "password")
 		req.SetBasicAuth("99el4gWxWuoh1of9vEGQvKZSHZwveuOh", "")
@@ -112,6 +111,32 @@ func (c *Contact) Create(params Params) {
 	}
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("Contact added")
+	} else {
+		fmt.Println("Error during request, status code: %d", resp.StatusCode)
+	}
+}
+
+func (c *Contact) Update(params Params) {
+	var endpoint string
+	if id, ok := params["iden"]; ok {
+		endpoint = fmt.Sprintf("https://api.pushbullet.com/v2/contacts/%s", id)
+		delete(params, "iden")
+	} else {
+		//TODO
+		//return error
+	}
+	request := NewPushRequest("POST", endpoint, params)
+	req, err := createFunc(request)
+	fmt.Println(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	resp, err := ExecuteRequest(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("Contact updated")
 	} else {
 		fmt.Println("Error during request, status code: %d", resp.StatusCode)
 	}
@@ -221,5 +246,6 @@ func main() {
 
 	contact := &Contact{}
 	fmt.Println(contact)
-	contact.Create(Params{"name": "foo", "email": "baz@bar.com"})
+	//contact.Create(Params{"name": "foo", "email": "baz@bar.com"})
+	contact.Update(Params{"iden": "ujDigsFMxWesjAdP9ajVsq", "name": "fooupdated"})
 }
