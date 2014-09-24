@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ var (
 		//parse params and jsonify
 		req, err := http.NewRequest(r.Method, r.Endpoint, nil)
 		//	req.SetBasicAuth("user", "password")
+		req.SetBasicAuth("99el4gWxWuoh1of9vEGQvKZSHZwveuOh", "")
 		if err != nil {
 			return nil, err
 		}
@@ -32,10 +34,13 @@ var (
 	}
 
 	createFunc = func(r *PushRequest) (*http.Request, error) {
-		req, err := newRequestFunc(r)
+		data, _ := json.Marshal(r.Params)
+		req, err := http.NewRequest(r.Method, r.Endpoint, bytes.NewBuffer(data))
+		//	req.SetBasicAuth("user", "password")
 		if err != nil {
 			return nil, err
 		}
+		req.SetBasicAuth("99el4gWxWuoh1of9vEGQvKZSHZwveuOh", "")
 		req.Header.Set("Content-Type", "application/json")
 		return req, nil
 	}
@@ -94,8 +99,10 @@ func (c *ContactsCollection) Get() {
 }
 
 func (c *Contact) Create(params Params) {
-	request := NewPushRequest("POST", "/contacts", params)
+	request := NewPushRequest("POST", "https://api.pushbullet.com/v2/contacts", params)
+	fmt.Println(request)
 	req, err := createFunc(request)
+	fmt.Println(req)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -103,13 +110,20 @@ func (c *Contact) Create(params Params) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if resp.StatusCode == 200 {
-		fmt.Println("Success")
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("Contact added")
+	} else {
+		fmt.Println("Error during request, status code: %d", resp.StatusCode)
 	}
-	//err = c.ParseResponse(resp)
-	//if err != nil {
-	//fmt.Println(err)
-	//}
+}
+
+func (c *Contact) ParseResponse(res *http.Response) error {
+	defer res.Body.Close()
+	err := json.NewDecoder(res.Body).Decode(c)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *ContactsCollection) ParseResponse(res *http.Response) error {
@@ -204,4 +218,8 @@ func main() {
 	me := &Me{}
 	me.Get()
 	fmt.Println(me)
+
+	contact := &Contact{}
+	fmt.Println(contact)
+	contact.Create(Params{"name": "foo", "email": "baz@bar.com"})
 }
