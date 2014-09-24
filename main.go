@@ -112,7 +112,7 @@ func (c *Contact) Create(params Params) {
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("Contact added")
 	} else {
-		fmt.Println("Error during request, status code: %d", resp.StatusCode)
+		fmt.Printf("Error during request, status code: %d", resp.StatusCode)
 	}
 }
 
@@ -138,7 +138,33 @@ func (c *Contact) Update(params Params) {
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("Contact updated")
 	} else {
-		fmt.Println("Error during request, status code: %d", resp.StatusCode)
+		fmt.Printf("Error during request, status code: %d", resp.StatusCode)
+	}
+}
+
+func (c *Contact) Delete(params Params) {
+	var endpoint string
+	if id, ok := params["iden"]; ok {
+		endpoint = fmt.Sprintf("https://api.pushbullet.com/v2/contacts/%s", id)
+		delete(params, "iden")
+	} else {
+		//TODO
+		//return error
+	}
+	request := NewPushRequest("DELETE", endpoint, nil)
+	req, err := newRequestFunc(request)
+	fmt.Println(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	resp, err := ExecuteRequest(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("Contact deleted")
+	} else {
+		fmt.Printf("Error during request, status code: %d", resp.StatusCode)
 	}
 }
 
@@ -244,8 +270,9 @@ func main() {
 	me.Get()
 	fmt.Println(me)
 
-	contact := &Contact{}
-	fmt.Println(contact)
+	//contact := &Contact{}
+	//fmt.Println(contact)
 	//contact.Create(Params{"name": "foo", "email": "baz@bar.com"})
-	contact.Update(Params{"iden": "ujDigsFMxWesjAdP9ajVsq", "name": "fooupdated"})
+	//contact.Update(Params{"iden": "ujDigsFMxWesjAdP9ajVsq", "name": "fooupdated"})
+	//contact.Delete(Params{"iden": "ujDigsFMxWesjAwktvpfqu"})
 }
