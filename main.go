@@ -24,8 +24,7 @@ var (
 		fmt.Println(log)
 
 		req, err := http.NewRequest(r.Method, r.Endpoint, nil)
-		//	req.SetBasicAuth("user", "password")
-		req.SetBasicAuth("99el4gWxWuoh1of9vEGQvKZSHZwveuOh", "")
+		req.SetBasicAuth("user", "password")
 		if err != nil {
 			return nil, err
 		}
@@ -35,10 +34,10 @@ var (
 	createFunc = func(r *PushRequest) (*http.Request, error) {
 		data, _ := json.Marshal(r.Params)
 		req, err := http.NewRequest(r.Method, r.Endpoint, bytes.NewBuffer(data))
-		//	req.SetBasicAuth("user", "password")
 		if err != nil {
 			return nil, err
 		}
+		req.SetBasicAuth("user", "password")
 		req.SetBasicAuth("99el4gWxWuoh1of9vEGQvKZSHZwveuOh", "")
 		req.Header.Set("Content-Type", "application/json")
 		return req, nil
