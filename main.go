@@ -38,7 +38,6 @@ var (
 			return nil, err
 		}
 		req.SetBasicAuth("user", "password")
-		req.SetBasicAuth("99el4gWxWuoh1of9vEGQvKZSHZwveuOh", "")
 		req.Header.Set("Content-Type", "application/json")
 		return req, nil
 	}
